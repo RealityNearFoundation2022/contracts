@@ -54,8 +54,9 @@ pub struct TokenFactory {
 #[serde(crate = "near_sdk::serde")]
 pub struct TokenArgs {
     owner_id: AccountId,
-    // total_supply: U128,
     metadata: NFTContractMetadata,
+    x: String, 
+    y: String,
 }
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, PanicOnDefault)]
@@ -136,8 +137,9 @@ impl TokenFactory {
             self.storage_deposit();
         }
         args.metadata.assert_valid();
+        let number = self.get_number_of_tokens() + 1;
+        args.metadata.symbol = format!("R{}", number);
         let token_id = args.metadata.symbol.to_ascii_lowercase();
-        args.owner_id = env::current_account_id();
         assert!(is_valid_token_id(&token_id), "Invalid Symbol");
         let token_account_id = format!("{}.{}", token_id, env::current_account_id());
         let token_account_id2 = format!("{}.{}", token_id, env::current_account_id());
@@ -147,6 +149,8 @@ impl TokenFactory {
         );
 
         let account_id = env::predecessor_account_id();
+
+        args.metadata.name = format!("#{}", number.to_string());
 
         let required_balance = self.get_min_attached_balance(&args);
         let user_balance = self.storage_deposits.get(&account_id).unwrap_or(0);
@@ -167,6 +171,7 @@ impl TokenFactory {
         let storage_balance_used =
             Balance::from(env::storage_usage() - initial_storage_usage) * STORAGE_PRICE_PER_BYTE;
 
+        args.owner_id = env::current_account_id();    
 
         let nft_token: NFTMint = NFTMint {
 
@@ -174,16 +179,16 @@ impl TokenFactory {
             receiver_id: account_id,
 
             token_metadata: TokenMetadata {
-                title: Some("title".to_string()),
-                description: Some("description".to_string()),
-                media: None,
+                title: Some("Reeland".to_string()), // reeland
+                description: Some("description".to_string()), // comuna 16
+                media: None, // image
                 media_hash: None,
                 copies: Some(1),
                 issued_at: None,
                 expires_at: None,
                 starts_at: None,
                 updated_at: None,
-                extra: Some("{ 'x': 1, 'y': 2 }".to_string()),
+                extra: Some(format!("{{ 'x': {}, 'y': {} }}", args.x, args.y)),
                 reference: None,
                 reference_hash: None,
             }
