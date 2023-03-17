@@ -17,3 +17,7 @@ Reality near project contracts
     * Buy Patchas
     * Buy Realands
 
+- Presale Contract
+
+    * Buy Token Reality
+    * Get Price Token
