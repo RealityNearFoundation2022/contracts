@@ -121,10 +121,12 @@ impl Contract {
             .with_static_gas(GAS_FOR_FT_TRANSFER)
             .with_attached_deposit(1 /* default deposit of 0 */)
             .ft_transfer(
-            owner_id.clone(),
-            token_amount.into(),
-            None
-        )
+              owner_id.clone(),
+              token_amount.into(),
+              None
+            );
+        
+        promise
     }
 
 
