@@ -86,6 +86,16 @@ impl Contract {
     fn on_tokens_burned(&mut self, account_id: AccountId, amount: Balance) {
         log!("Account @{} burned {}", account_id, amount);
     }
+
+    #[private]
+    pub fn set_icon(&mut self, icon: String) {
+        // Get the current metadata (if it exists)
+        if let Some(mut metadata) = self.metadata.get() {
+            // Change the icon
+            metadata.icon = Some(icon);
+            self.metadata.set(&metadata);
+        }
+    }
 }
 
 near_contract_standards::impl_fungible_token_core!(Contract, token, on_tokens_burned);
