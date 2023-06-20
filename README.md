@@ -21,3 +21,7 @@ Reality near project contracts
 
     * Buy Token Reality
     * Get Price Token
+
+- Packages Contract
+
+   * Buy packages token Reality
