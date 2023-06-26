@@ -93,6 +93,11 @@ near call $CONTRACT buy '{"package": 1, "quantity": 1}' --accountId lolabunny.te
 
 Please note that after calling new(), you need to transfer the tokens to the contract using the ft_transfer function.
 
+
+### Other Way
+
+execute ´call_new.sh´ and follow the steps
+
 ## Build and Deploy
 
 You can use the NEAR CLI to build the contract. To deploy the contract, you need access to the NEAR TestNet or MainNet, and an account on NEAR.
@@ -100,3 +105,5 @@ You can use the NEAR CLI to build the contract. To deploy the contract, you need
 ## Disclaimer
 
 This contract is a demonstration and not intended for production use. If you plan to use this code in a production environment, ensure that it has been thoroughly tested and that the contract logic meets your requirements.
+
+
