@@ -1,15 +1,15 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{env, near_bindgen, Balance, ext_contract};
-use near_sdk::json_types::{U128, U64, ValidAccountId};
-use near_sdk::{AccountId, Promise, PanicOnDefault, assert_one_yocto};
-use near_sdk::serde_json;
-use serde_json::json;
-use near_sdk::collections::Vector;
+use near_sdk::{env, near_bindgen, Balance};
+use near_sdk::json_types::{U128, U64};
+use near_sdk::{AccountId, Promise, PanicOnDefault};
+// use near_sdk::serde_json;
+// use serde_json::json;
+// use near_sdk::collections::Vector;
 
-use crate::utils::{ext_fungible_token, GAS_FOR_FT_TRANSFER, ONE_MONTH, XCC_GAS};
+use crate::utils::{ext_fungible_token, GAS_FOR_FT_TRANSFER};
 mod utils;
 
-near_sdk::setup_alloc!();
+// near_sdk::setup_alloc!();
 
 
 #[near_bindgen]
@@ -41,9 +41,9 @@ pub struct Contract {
 impl Contract {
     #[init]
     pub fn new(
-        owner: ValidAccountId,
-        recipient : ValidAccountId,
-        token: ValidAccountId,
+        owner: AccountId,
+        recipient : AccountId,
+        token: AccountId,
         token_price: U128,
         amount: U128,
         start: U64,
@@ -114,7 +114,7 @@ impl Contract {
     #[private]
     pub fn transfer(&mut self, owner_id: AccountId, token_amount: u128) -> Promise {
 
-        let attached_deposit = env::attached_deposit();
+        let _attached_deposit = env::attached_deposit();
         // assert_eq!(attached_deposit, 1, "Requires attached deposit of exactly 1 yoctoNEAR");
 
         let promise = ext_fungible_token::ext(self.token.clone())
@@ -140,7 +140,6 @@ impl Contract {
         ext_fungible_token::ext(self.token.clone())
             .with_attached_deposit(attached)
             .storage_deposit(owner_id.clone())
-
     }
 
 
@@ -156,94 +155,6 @@ impl Contract {
         self.amount_claimed = self.amount_claimed.checked_add(token_amount).expect("ERR_INTEGER_OVERFLOW");
 
         self.transfer(owner_id, token_amount)
-    }
-
-    // #[private]
-    // pub fn callback_arg_macro(#[callback_unwrap] val: String) -> String {
-    //     val
-    // }
-
-
-    #[payable]
-    pub fn claim_vested(&mut self) -> Promise {
-        assert_one_yocto();
-        assert_eq!(env::predecessor_account_id(), self.recipient(), "ERR_CALLER_NOT_RECIPIENT");
-        assert!(self.is_active, "ERR_VESTING_CONTRACT_NOT_ACTIVE");
-        let releasable = self.internal_releasable_amount();
-        assert!(releasable > 0, "ERR_NO_VESTED_AMOUNT_ARE_DUE");
-
-        self.amount_claimed = self.amount_claimed.checked_add(releasable).expect("ERR_INTEGER_OVERFLOW");
-
-        ext_fungible_token::ext(self.token.clone())
-        .ft_transfer(
-            self.recipient.clone(),
-            releasable.into(),
-            None
-        )
-    }
-
-    pub fn releasable_amount(&self) -> U128 {
-        self.internal_releasable_amount().into()
-    }
-
-    pub fn calculate_amount_vested(&self) -> U128 {
-        self.internal_calculate_amount_vested().into()
-    }
-
-    fn internal_releasable_amount(&self) -> u128 {
-        self.internal_calculate_amount_vested().checked_sub(self.amount_claimed).expect("ERR_INTEGER_OVERFLOW")
-    }
-
-    fn internal_calculate_amount_vested(&self) -> u128{
-        let block_timestamp = env::block_timestamp();
-        if block_timestamp < self.cliff {
-            return 0;
-        }
-
-        let elapsed_time = block_timestamp - self.start;
-
-        if elapsed_time >= self.duration {
-            let vested_amount = self.amount;
-            return vested_amount;
-        } else {
-            let vested_amount = self.amount * ( elapsed_time / ONE_MONTH ) as u128 / ( self.duration / ONE_MONTH ) as u128;
-            return vested_amount;
-        }
-    }
-
-    #[payable]
-    pub fn revoke(&mut self) -> U128 {
-        assert_eq!(self.owner(), env::predecessor_account_id(), "ERR_NOT_OWNER");
-        assert_one_yocto();
-        assert!(self.revocable, "ERR_GRANT_NOT_REVOCABLE");
-        assert!(self.is_active, "ERR_VESTING_CONTRACT_NOT_ACTIVE");
-
-        let releasable: u128 = self.internal_releasable_amount();
-        let amount_not_vested: u128 = self.amount.checked_sub(self.amount_claimed).expect("Integer underflow").checked_sub(releasable).expect("Integer underflow");
-
-        self.is_active = false;
-        self.amount = 0;
-        self.start = 0;
-        self.duration = 0;
-        self.cliff = 0;
-
-        // transfer current amount_vested to original recipient
-        ext_fungible_token::ext(self.token.clone())
-        .ft_transfer(
-            self.recipient(),
-            releasable.into(),
-            None
-        );
-
-        // transfer leftover to recipient specified
-        ext_fungible_token::ext(self.token.clone())
-        .ft_transfer(
-            self.owner(),
-            amount_not_vested.into(),
-            None
-        );
-
-        return amount_not_vested.into();
     }
 
     pub fn change_recipient(&mut self, recipient: AccountId) {
@@ -279,7 +190,7 @@ mod tests {
     const ONE_DAY:u64 = 86400000000000;
     const SIX_MONTHS: u64 = ONE_MONTH * 6;
 
-    fn get_context(predecessor_account_id: ValidAccountId) -> VMContextBuilder {
+    fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
         let mut builder = VMContextBuilder::new();
         builder
             .current_account_id(accounts(0))

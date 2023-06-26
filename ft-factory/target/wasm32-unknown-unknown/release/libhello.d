@@ -1,0 +1,1 @@
+/home/vagrant/reality_near_foundation/contracts/hello/target/wasm32-unknown-unknown/release/libhello.rlib: /home/vagrant/reality_near_foundation/contracts/hello/src/lib.rs /home/vagrant/reality_near_foundation/contracts/hello/src/token-contract/fungible_token.wasm

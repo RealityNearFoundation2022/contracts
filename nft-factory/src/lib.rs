@@ -15,7 +15,7 @@ use near_contract_standards::non_fungible_token::metadata::{
 
 near_sdk::setup_alloc!();
 
-const NFT_WASM_CODE: &[u8] = include_bytes!("./nft-contract/non_fungible_token.wasm");
+const NFT_WASM_CODE: &[u8] = include_bytes!("./nft-contract/nft_simple.wasm");
 
 const EXTRA_BYTES: usize = 10000;
 // const GAS: Gas = 50_000_000_000_000;
@@ -40,6 +40,7 @@ pub fn is_valid_token_id(token_id: &TokenId) -> bool {
 enum StorageKey {
     Tokens,
     StorageDeposits,
+    TokensByPosition,
 }
 
 #[near_bindgen]
@@ -48,6 +49,7 @@ pub struct TokenFactory {
     pub tokens: UnorderedMap<TokenId, TokenArgs>,
     pub storage_deposits: LookupMap<AccountId, Balance>,
     pub storage_balance_cost: Balance,
+    pub tokens_by_position: UnorderedMap<String, TokenArgs>,
 }
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
@@ -84,6 +86,7 @@ impl TokenFactory {
             tokens: UnorderedMap::new(StorageKey::Tokens),
             storage_deposits,
             storage_balance_cost,
+            tokens_by_position: UnorderedMap::new(StorageKey::TokensByPosition),
         }
     }
 
@@ -131,8 +134,12 @@ impl TokenFactory {
         self.tokens.get(&token_id)
     }
 
+    pub fn get_by_position(&self, position: String) -> Option<TokenArgs> {
+        self.tokens_by_position.get(&position)
+    }
+
     #[payable]
-    pub fn create_token(&mut self, mut args: TokenArgs) -> Promise {
+    pub fn create_token(&mut self, mut args: TokenArgs, token_metadata: TokenMetadata) -> Promise {
         if env::attached_deposit() > 0 {
             self.storage_deposit();
         }
@@ -143,14 +150,15 @@ impl TokenFactory {
         assert!(is_valid_token_id(&token_id), "Invalid Symbol");
         let token_account_id = format!("{}.{}", token_id, env::current_account_id());
         let token_account_id2 = format!("{}.{}", token_id, env::current_account_id());
-        assert!(
+        
+        assert  !(
             env::is_valid_account_id(token_account_id.as_bytes()),
             "Token Account ID is invalid"
         );
 
         let account_id = env::predecessor_account_id();
 
-        args.metadata.name = format!("#{}", number.to_string());
+        args.metadata.name = format!("Realand #{}", number.to_string());
 
         let required_balance = self.get_min_attached_balance(&args);
         let user_balance = self.storage_deposits.get(&account_id).unwrap_or(0);
@@ -163,9 +171,17 @@ impl TokenFactory {
 
         let initial_storage_usage = env::storage_usage();
 
+        //insert the token and token struct and make sure that the token doesn't exist
         assert!(
             self.tokens.insert(&token_id, &args).is_none(),
             "Token ID is already taken"
+        );
+
+        let position = format!("{}-{}", args.x, args.y);
+        //insert the position and token struct and make sure that the position doesn't exist
+        assert!(
+            self.tokens_by_position.insert(&position, &args).is_none(),
+            "Position already exists"
         );
 
         let storage_balance_used =
@@ -179,29 +195,29 @@ impl TokenFactory {
             receiver_id: account_id,
 
             token_metadata: TokenMetadata {
-                title: Some("Reeland".to_string()), // reeland
-                description: Some("description".to_string()), // comuna 16
-                media: None, // image
-                media_hash: None,
+                title: Some(format!("Land #{}-{}", args.x, args.y)), // reeland
+                description: token_metadata.description,// Some("description".to_string()), // comuna 16
+                media: token_metadata.media,// None, // image
+                media_hash: token_metadata.media_hash,//None,
                 copies: Some(1),
-                issued_at: None,
-                expires_at: None,
-                starts_at: None,
-                updated_at: None,
+                issued_at: token_metadata.issued_at,// None,
+                expires_at: token_metadata.expires_at,// None,
+                starts_at: token_metadata.starts_at,// None,
+                updated_at: token_metadata.updated_at,// None,
                 extra: Some(format!("{{ 'x': {}, 'y': {} }}", args.x, args.y)),
-                reference: None,
-                reference_hash: None,
+                reference: token_metadata.reference,//None,
+                reference_hash: token_metadata.reference_hash//None,
             }
         };
 
         let p1 = Promise::new(token_account_id)
             .create_account()
-            .transfer(required_balance - storage_balance_used)
+            .transfer(required_balance - storage_balance_used + 7310000000000000000000)
             .deploy_contract(NFT_WASM_CODE.to_vec())
             .function_call(b"new".to_vec(), serde_json::to_vec(&args).unwrap(), 0, TGAS * 50);
 
         let p2 = Promise::new(token_account_id2)
-            .function_call(b"nft_mint".to_vec(), serde_json::to_vec(&nft_token).unwrap(), 6010000000000000000000, TGAS * 50);    
+            .function_call(b"nft_mint".to_vec(), serde_json::to_vec(&nft_token).unwrap(), 10710000000000000000000, TGAS * 50);    
 
         p1.then(p2)
     }

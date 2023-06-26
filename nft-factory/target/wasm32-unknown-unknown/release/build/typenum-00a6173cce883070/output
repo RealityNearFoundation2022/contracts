@@ -1,0 +1,3 @@
+cargo:rerun-if-changed=build/main.rs
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/home/vagrant/reality_near_foundation/contracts/nft-factory/target/wasm32-unknown-unknown/release/build/typenum-00a6173cce883070/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/home/vagrant/reality_near_foundation/contracts/nft-factory/target/wasm32-unknown-unknown/release/build/typenum-00a6173cce883070/out/op.rs

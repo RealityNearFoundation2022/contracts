@@ -1,0 +1,1 @@
+/home/vagrant/reality_near_foundation/contracts/nft-factory/target/wasm32-unknown-unknown/release/libnft_factory.rlib: /home/vagrant/reality_near_foundation/contracts/nft-factory/src/lib.rs /home/vagrant/reality_near_foundation/contracts/nft-factory/src/nft-contract/nft_simple.wasm

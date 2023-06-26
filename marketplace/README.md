@@ -106,9 +106,6 @@ you need a nft contract or nft owner token
 near call nft3.guxal.testnet nft_approve '{ "token_id": "token-1", "account_id": "mkp.guxal.testnet", "msg": "{\"sale_conditions\": \"1000000000000\"}" }' --accountId guxal.testnet --deposit 0.1
 
 
-
-
-
 Update Price Sell
 =================
 near call mkp.guxal.testnet update_price '{ "nft_contract_id": "nft3.guxal.testnet", "token_id": "token-1", "price": "1" }' --accountId guxal.testnet --depositYocto 1
