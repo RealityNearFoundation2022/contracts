@@ -127,6 +127,9 @@ impl Contract {
             self.is_active,
             "La compra no está permitida porque el contrato no está activo"
         );
+        assert!(env::block_timestamp() >= self.start, "Presale has not started yet");
+        assert!(env::block_timestamp() <= self.start + self.duration, "Presale has ended");
+        
         let predecessor = env::predecessor_account_id();
         // let initial_balance = env::account_balance();
         let owner_id: AccountId = env::predecessor_account_id();
