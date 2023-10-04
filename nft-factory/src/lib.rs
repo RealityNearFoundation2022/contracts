@@ -1,23 +1,21 @@
-use near_contract_standards::fungible_token::metadata::FungibleTokenMetadata;
+// use near_contract_standards::fungible_token::metadata::FungibleTokenMetadata;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LookupMap, UnorderedMap};
 use near_sdk::env::STORAGE_PRICE_PER_BYTE;
-use near_sdk::json_types::{ValidAccountId, U128};
+use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::serde_json;
 use near_sdk::{
-    env, near_bindgen, AccountId, Balance, BorshStorageKey, PanicOnDefault, Promise, Gas,
+    env, near_bindgen, AccountId, Balance, BorshStorageKey, PanicOnDefault, Promise,
 };
-
-use near_contract_standards::non_fungible_token::metadata::{
-    NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata, NFT_METADATA_SPEC,
-};
-
+// use near_sdk::PromiseResult;
+use near_contract_standards::non_fungible_token::metadata::TokenMetadata;
+// NonFungibleTokenMetadataProvider NFT_METADATA_SPEC Gas
 near_sdk::setup_alloc!();
 
-const NFT_WASM_CODE: &[u8] = include_bytes!("./nft-contract/non_fungible_token.wasm");
+// const NFT_WASM_CODE: &[u8] = include_bytes!("./nft-contract/nft_simple.wasm");
 
-const EXTRA_BYTES: usize = 10000;
+// const EXTRA_BYTES: usize = 10000;
 // const GAS: Gas = 50_000_000_000_000;
 
 const TGAS: u64 = 1_000_000_000_000;
@@ -36,10 +34,26 @@ pub fn is_valid_token_id(token_id: &TokenId) -> bool {
     true
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct FtBalanceOfArgs {
+    account_id: AccountId,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct FtTransferArgs {
+    receiver_id: AccountId,
+    amount: U128,
+    memo: Option<String>,
+}
+
+
 #[derive(BorshSerialize, BorshStorageKey)]
 enum StorageKey {
     Tokens,
     StorageDeposits,
+    TokensByPosition,
 }
 
 #[near_bindgen]
@@ -48,13 +62,17 @@ pub struct TokenFactory {
     pub tokens: UnorderedMap<TokenId, TokenArgs>,
     pub storage_deposits: LookupMap<AccountId, Balance>,
     pub storage_balance_cost: Balance,
+    pub tokens_by_position: UnorderedMap<String, TokenArgs>,
+    pub ft_contract_id: AccountId,
+    pub nft_contract_id: AccountId,
 }
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TokenArgs {
     owner_id: AccountId,
-    metadata: NFTContractMetadata,
+    // metadata: NFTContractMetadata,
+    token_metadata: TokenMetadata,
     x: String, 
     y: String,
 }
@@ -67,10 +85,20 @@ pub struct NFTMint {
     token_metadata: TokenMetadata,
 }
 
+// ---------| Token Creation Args |----------
+// #[derive(Serialize, Deserialize)]
+// #[serde(crate = "near_sdk::serde")]
+// pub struct TokenCreationArgs {
+//     // Define aquí las propiedades necesarias para crear el token, por ejemplo:
+//     args: TokenArgs,
+//     token_metadata: TokenMetadata,
+// }
+
+
 #[near_bindgen]
 impl TokenFactory {
     #[init]
-    pub fn new() -> Self {
+    pub fn new(ft_contract_id: AccountId, nft_contract_id: AccountId) -> Self {
         let mut storage_deposits = LookupMap::new(StorageKey::StorageDeposits);
 
         let initial_storage_usage = env::storage_usage();
@@ -84,23 +112,26 @@ impl TokenFactory {
             tokens: UnorderedMap::new(StorageKey::Tokens),
             storage_deposits,
             storage_balance_cost,
+            tokens_by_position: UnorderedMap::new(StorageKey::TokensByPosition),
+            ft_contract_id,
+            nft_contract_id,
         }
     }
 
-    fn get_min_attached_balance(&self, args: &TokenArgs) -> u128 {
-        ((NFT_WASM_CODE.len() + EXTRA_BYTES + args.try_to_vec().unwrap().len() * 2) as Balance
-            * STORAGE_PRICE_PER_BYTE)
-            .into()
-    }
+    // fn get_min_attached_balance(&self, args: &TokenArgs) -> u128 {
+    //     ((NFT_WASM_CODE.len() + EXTRA_BYTES + args.try_to_vec().unwrap().len() * 2) as Balance
+    //         * STORAGE_PRICE_PER_BYTE)
+    //         .into()
+    // }
 
-    pub fn get_required_deposit(&self, args: TokenArgs, account_id: ValidAccountId) -> U128 {
-        let args_deposit = self.get_min_attached_balance(&args);
-        if let Some(previous_balance) = self.storage_deposits.get(account_id.as_ref()) {
-            args_deposit.saturating_sub(previous_balance).into()
-        } else {
-            (self.storage_balance_cost + args_deposit).into()
-        }
-    }
+    // pub fn get_required_deposit(&self, args: TokenArgs, account_id: ValidAccountId) -> U128 {
+    //     let args_deposit = self.get_min_attached_balance(&args);
+    //     if let Some(previous_balance) = self.storage_deposits.get(account_id.as_ref()) {
+    //         args_deposit.saturating_sub(previous_balance).into()
+    //     } else {
+    //         (self.storage_balance_cost + args_deposit).into()
+    //     }
+    // }
 
     #[payable]
     pub fn storage_deposit(&mut self) {
@@ -132,78 +163,102 @@ impl TokenFactory {
     }
 
     #[payable]
-    pub fn create_token(&mut self, mut args: TokenArgs) -> Promise {
+    pub fn ft_on_transfer(&mut self, sender_id: AccountId, amount: U128, msg: String) -> U128 {
+        const TOKEN_CREATION_FEE: u128 = 100;
+        let required_fee = TOKEN_CREATION_FEE;
+        
+        // Asegurar que la cantidad transferida sea suficiente.
+        assert!(amount.0 >= required_fee, "Insufficient FT tokens sent for token creation!");
+
+        // Decodificar el mensaje para extraer argumentos para crear el token
+        let nft_creation_args: TokenArgs = serde_json::from_str(&msg)
+            .expect("Invalid message provided");
+
+        // Crear el token basado en los argumentos
+        self.internal_create_token(nft_creation_args);
+
+        // Si hay más tokens de los necesarios, devolvemos el exceso al remitente.
+        if amount.0 > required_fee {
+            let refund_amount = amount.0 - required_fee;
+            Promise::new(sender_id).function_call(
+                b"ft_transfer".to_vec(),
+                serde_json::to_vec(&FtTransferArgs {
+                    receiver_id: env::predecessor_account_id(),
+                    amount: refund_amount.into(),
+                    memo: Some("Refund for excess deposit".to_string()),
+                })
+                .unwrap(),
+                1,
+                TGAS * 10,
+            );
+        }
+
+        // Retornar la cantidad utilizada (que es la tarifa)
+        U128(0)
+    }
+    
+
+    // fn internal_create_token(&mut self, data: TokenCreationArgs) {
+    fn internal_create_token(&mut self, data: TokenArgs) {
+        let args = data;
+        // let mut args = data.args;
+        let token_metadata = args.token_metadata.clone();
+    
+        // Si hay un depósito adjunto, procesarlo.
         if env::attached_deposit() > 0 {
             self.storage_deposit();
         }
-        args.metadata.assert_valid();
+    
+        // args.metadata.assert_valid();
         let number = self.get_number_of_tokens() + 1;
-        args.metadata.symbol = format!("R{}", number);
-        let token_id = args.metadata.symbol.to_ascii_lowercase();
-        assert!(is_valid_token_id(&token_id), "Invalid Symbol");
-        let token_account_id = format!("{}.{}", token_id, env::current_account_id());
-        let token_account_id2 = format!("{}.{}", token_id, env::current_account_id());
-        assert!(
-            env::is_valid_account_id(token_account_id.as_bytes()),
-            "Token Account ID is invalid"
-        );
-
-        let account_id = env::predecessor_account_id();
-
-        args.metadata.name = format!("#{}", number.to_string());
-
-        let required_balance = self.get_min_attached_balance(&args);
-        let user_balance = self.storage_deposits.get(&account_id).unwrap_or(0);
-        assert!(
-            user_balance >= required_balance,
-            "Not enough required balance"
-        );
-        self.storage_deposits
-            .insert(&account_id, &(user_balance - required_balance));
-
-        let initial_storage_usage = env::storage_usage();
-
+        // args.metadata.symbol = format!("R{}", number);
+        let token_id = format!("R{}", number);
+        // let token_id = args.metadata.symbol.to_ascii_lowercase();
+        // assert!(is_valid_token_id(&token_id), "Invalid Symbol");
+        let token_account_id_2 = self.nft_contract_id.clone(); // format!("{}.{}", token_id, env::current_account_id());
+    
+        let account_id = args.owner_id.clone();
+        // args.metadata.name = format!("Realand #{}", number.to_string());
+    
+        // let initial_storage_usage = env::storage_usage();
+    
+        // Insert the token and make sure that the token doesn't exist
         assert!(
             self.tokens.insert(&token_id, &args).is_none(),
             "Token ID is already taken"
         );
-
-        let storage_balance_used =
-            Balance::from(env::storage_usage() - initial_storage_usage) * STORAGE_PRICE_PER_BYTE;
-
-        args.owner_id = env::current_account_id();    
-
+    
+        let position = format!("{}-{}", args.x, args.y);
+        // Insert the position and make sure that the position doesn't exist
+        assert!(
+            self.tokens_by_position.insert(&position, &args).is_none(),
+            "Position already exists"
+        );
+    
+        //args.owner_id = env::current_account_id();
+    
         let nft_token: NFTMint = NFTMint {
-
             token_id: token_id,
             receiver_id: account_id,
-
             token_metadata: TokenMetadata {
-                title: Some("Reeland".to_string()), // reeland
-                description: Some("description".to_string()), // comuna 16
-                media: None, // image
-                media_hash: None,
+                title: Some(format!("Land #{}-{}", args.x, args.y)),
+                description: token_metadata.description,
+                media: token_metadata.media,
+                media_hash: token_metadata.media_hash,
                 copies: Some(1),
-                issued_at: None,
-                expires_at: None,
-                starts_at: None,
-                updated_at: None,
+                issued_at: token_metadata.issued_at,
+                expires_at: token_metadata.expires_at,
+                starts_at: token_metadata.starts_at,
+                updated_at: token_metadata.updated_at,
                 extra: Some(format!("{{ 'x': {}, 'y': {} }}", args.x, args.y)),
-                reference: None,
-                reference_hash: None,
+                reference: token_metadata.reference,
+                reference_hash: token_metadata.reference_hash,
             }
         };
-
-        let p1 = Promise::new(token_account_id)
-            .create_account()
-            .transfer(required_balance - storage_balance_used)
-            .deploy_contract(NFT_WASM_CODE.to_vec())
-            .function_call(b"new".to_vec(), serde_json::to_vec(&args).unwrap(), 0, TGAS * 50);
-
-        let p2 = Promise::new(token_account_id2)
-            .function_call(b"nft_mint".to_vec(), serde_json::to_vec(&nft_token).unwrap(), 6010000000000000000000, TGAS * 50);    
-
-        p1.then(p2)
+    
+        Promise::new(token_account_id_2.to_string())
+            .function_call(b"nft_mint".to_vec(), serde_json::to_vec(&nft_token).unwrap(), 10710000000000000000000, TGAS * 50);
     }
-
+    
+    // --------------------------------------------------------------------------------------------
 }
