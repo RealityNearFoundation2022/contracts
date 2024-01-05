@@ -1,0 +1,9 @@
+/Users/jonathancardenas/code/realitynear/contracts/marketplace/target/debug/deps/wee_alloc-9eca668b0b36c3f4.rmeta: /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/lib.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/extra_assert.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/const_init.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/neighbors.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/imp_unix.rs
+
+/Users/jonathancardenas/code/realitynear/contracts/marketplace/target/debug/deps/wee_alloc-9eca668b0b36c3f4.d: /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/lib.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/extra_assert.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/const_init.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/neighbors.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/imp_unix.rs
+
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/lib.rs:
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/extra_assert.rs:
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/const_init.rs:
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/neighbors.rs:
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wee_alloc-0.4.5/src/imp_unix.rs:

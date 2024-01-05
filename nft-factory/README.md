@@ -108,7 +108,13 @@ near call $FT ft_transfer_call "{   \"receiver_id\":\"$FACTORY\",   \"amount\":\
 
 
 
-near call $FT ft_transfer_call "{ \"receiver_id\":\"$FACTORY\",   \"amount\":\"100\",   \"msg\":\"{ \\\"owner_id\\\": \\\"test2221.testnet\\\", \\\"x\\\": \\\"43\\\", \\\"y\\\": \\\"27\\\" ,\\\"token_metadata\\\": {  \\\"description\\\": \\\"comuna 16\\\",    \\\"media\\\": \\\"image\\\",    \\\"media_hash\\\": \\\"hash\\\"} }\"}" --accountId test2221.testnet --depositYocto 1 --gas 300000000000000
+near call $FT ft_transfer_call "{ \"receiver_id\":\"$FACTORY\",   \"amount\":\"100\",   \"msg\":\"{ \\\"owner_id\\\": \\\"test2221.testnet\\\", \\\"x\\\": \\\"60\\\", \\\"y\\\": \\\"27\\\" ,\\\"token_metadata\\\": {  \\\"description\\\": \\\"comuna 16\\\",    \\\"media\\\": \\\"image\\\",    \\\"media_hash\\\": \\\"hash\\\"} }\"}" --accountId test2221.testnet --depositYocto 1 --gas 300000000000000
+
+near call $FT ft_transfer_call "{ \"receiver_id\":\"$FACTORY\",   \"amount\":\"100\",   \"msg\":\"{}\"}" --accountId test2221.testnet --depositYocto 1 --gas 300000000000000
+
+export FT=ft.test2221.testnet
+
+export FACTORY=nft-factory.test2221.testnet
 
 
 ```

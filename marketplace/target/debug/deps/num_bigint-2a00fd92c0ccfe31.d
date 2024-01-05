@@ -1,0 +1,13 @@
+/Users/jonathancardenas/code/realitynear/contracts/marketplace/target/debug/deps/num_bigint-2a00fd92c0ccfe31.rmeta: /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/lib.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/macros.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/bigint.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/biguint.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/algorithms.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/monty.rs /Users/jonathancardenas/code/realitynear/contracts/marketplace/target/debug/build/num-bigint-b6424b45d23426df/out/radix_bases.rs
+
+/Users/jonathancardenas/code/realitynear/contracts/marketplace/target/debug/deps/num_bigint-2a00fd92c0ccfe31.d: /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/lib.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/macros.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/bigint.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/biguint.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/algorithms.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/monty.rs /Users/jonathancardenas/code/realitynear/contracts/marketplace/target/debug/build/num-bigint-b6424b45d23426df/out/radix_bases.rs
+
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/lib.rs:
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/macros.rs:
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/bigint.rs:
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/biguint.rs:
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/algorithms.rs:
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-bigint-0.3.1/src/monty.rs:
+/Users/jonathancardenas/code/realitynear/contracts/marketplace/target/debug/build/num-bigint-b6424b45d23426df/out/radix_bases.rs:
+
+# env-dep:OUT_DIR=/Users/jonathancardenas/code/realitynear/contracts/marketplace/target/debug/build/num-bigint-b6424b45d23426df/out

@@ -1,0 +1,2 @@
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/Users/jonathancardenas/code/realitynear/contracts/marketplace/target/debug/build/typenum-5bf86248bb7dde45/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/Users/jonathancardenas/code/realitynear/contracts/marketplace/target/debug/build/typenum-5bf86248bb7dde45/out/op.rs

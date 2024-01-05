@@ -56,12 +56,21 @@ enum StorageKey {
     TokensByPosition,
 }
 
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct PriceThreshold {
+    threshold: u64,
+    price: u128,
+}
+
+
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct TokenFactory {
     pub tokens: UnorderedMap<TokenId, TokenArgs>,
     pub storage_deposits: LookupMap<AccountId, Balance>,
     pub storage_balance_cost: Balance,
+    pub price_thresholds: Vec<PriceThreshold>,
     pub tokens_by_position: UnorderedMap<String, TokenArgs>,
     pub ft_contract_id: AccountId,
     pub nft_contract_id: AccountId,
@@ -108,10 +117,17 @@ impl TokenFactory {
             Balance::from(env::storage_usage() - initial_storage_usage) * STORAGE_PRICE_PER_BYTE;
         storage_deposits.remove(&tmp_account_id);
 
+        let price_thresholds = vec![
+            PriceThreshold { threshold: 1000, price: 700 },
+            PriceThreshold { threshold: 10000, price: 2000 },
+            // ... otros umbrales si los hay
+        ];
+
         Self {
             tokens: UnorderedMap::new(StorageKey::Tokens),
             storage_deposits,
             storage_balance_cost,
+            price_thresholds,
             tokens_by_position: UnorderedMap::new(StorageKey::TokensByPosition),
             ft_contract_id,
             nft_contract_id,
@@ -132,6 +148,25 @@ impl TokenFactory {
     //         (self.storage_balance_cost + args_deposit).into()
     //     }
     // }
+
+    fn get_current_price(&self) -> u128 {
+        let total_minted: u64 = self.tokens.len().try_into().expect("Overflow on conversion");
+        let mut current_price = 0;
+        for threshold in self.price_thresholds.iter() {
+            if total_minted < threshold.threshold {
+                break;
+            }
+            current_price = threshold.price;
+        }
+        current_price
+    }
+
+    pub fn get_current_price_and_total_sold(&self) -> (u128, u64) {
+        let total_sold: u64 = self.tokens.len().try_into().unwrap_or_else(|_| panic!("Overflow on conversion"));
+        let current_price = self.get_current_price();
+
+        (current_price, total_sold)
+    }
 
     #[payable]
     pub fn storage_deposit(&mut self) {
@@ -164,11 +199,14 @@ impl TokenFactory {
 
     #[payable]
     pub fn ft_on_transfer(&mut self, sender_id: AccountId, amount: U128, msg: String) -> U128 {
-        const TOKEN_CREATION_FEE: u128 = 100;
-        let required_fee = TOKEN_CREATION_FEE;
+        //const TOKEN_CREATION_FEE: u128 = 100;
+        //let required_fee = TOKEN_CREATION_FEE;
+
+        let current_price = self.get_current_price();
+        assert!(amount.0 >= current_price, "Insufficient FT tokens sent for token creation!");
         
         // Asegurar que la cantidad transferida sea suficiente.
-        assert!(amount.0 >= required_fee, "Insufficient FT tokens sent for token creation!");
+        //assert!(amount.0 >= required_fee, "Insufficient FT tokens sent for token creation!");
 
         // Decodificar el mensaje para extraer argumentos para crear el token
         let nft_creation_args: TokenArgs = serde_json::from_str(&msg)
@@ -178,8 +216,8 @@ impl TokenFactory {
         self.internal_create_token(nft_creation_args);
 
         // Si hay más tokens de los necesarios, devolvemos el exceso al remitente.
-        if amount.0 > required_fee {
-            let refund_amount = amount.0 - required_fee;
+        if amount.0 > current_price {
+            let refund_amount = amount.0 - current_price;
             Promise::new(sender_id).function_call(
                 b"ft_transfer".to_vec(),
                 serde_json::to_vec(&FtTransferArgs {

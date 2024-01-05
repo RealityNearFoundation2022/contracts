@@ -1,0 +1,10 @@
+/Users/jonathancardenas/code/realitynear/contracts/marketplace/target/debug/deps/version_check-5d9d553761df5503.rmeta: /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/lib.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/version.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/channel.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/date.rs
+
+/Users/jonathancardenas/code/realitynear/contracts/marketplace/target/debug/deps/libversion_check-5d9d553761df5503.rlib: /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/lib.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/version.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/channel.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/date.rs
+
+/Users/jonathancardenas/code/realitynear/contracts/marketplace/target/debug/deps/version_check-5d9d553761df5503.d: /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/lib.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/version.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/channel.rs /Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/date.rs
+
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/lib.rs:
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/version.rs:
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/channel.rs:
+/Users/jonathancardenas/.cargo/registry/src/index.crates.io-6f17d22bba15001f/version_check-0.9.2/src/date.rs:
